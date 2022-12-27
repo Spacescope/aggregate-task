@@ -19,8 +19,8 @@ func AggregateTaskStart(ctx context.Context, finalityEpoch uint64, task string, 
 	// replay the missing epochs
 	for idx, height := range missingHeight {
 		// runtask
-		log.Infof("Self-Inspection: replay[%v] height: %v", idx, height)
-		if err := core.RunTask(ctx, task, height); err != nil {
+		log.Infof("Self-Inspection: replay[%v] height: %v", idx, int64(height))
+		if err := core.RunTask(ctx, task, int64(height)); err != nil {
 			return
 		}
 	}

@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func RunTask(ctx context.Context, task string, height uint64) error {
+func RunTask(ctx context.Context, task string, height int64) error {
 	return tasks.GetTask(task).Run(ctx, height)
 }
 
@@ -44,39 +44,6 @@ func SelfInspection(ctx context.Context, task string, dependTasks []string) ([]u
 		taskHeightSet = append(taskHeightSet, task.Height)
 	}
 
-	// {
-	// 	x := utils.Intersect(dependentTasksHeightSets...)
-	// 	_ = x
-
-	// 	intersect_x1 := utils.Intersect(dependentTasksHeightSets[0], dependentTasksHeightSets[1])
-	// 	_ = intersect_x1
-
-	// 	except_x1_1 := utils.Except(dependentTasksHeightSets[0], dependentTasksHeightSets[1])
-	// 	_ = except_x1_1
-
-	// 	except_x1_2 := utils.Except(dependentTasksHeightSets[1], dependentTasksHeightSets[0])
-	// 	_ = except_x1_2
-
-	// 	x2 := utils.Intersect(dependentTasksHeightSets[1], dependentTasksHeightSets[2])
-	// 	_ = x2
-
-	// 	a := utils.Except(dependentTasksHeightSets[0], x)
-	// 	b := utils.Except(dependentTasksHeightSets[1], x)
-	// 	c := utils.Except(dependentTasksHeightSets[2], x)
-
-	// 	_ = a
-	// 	_ = b
-	// 	_ = c
-
-	// 	d := utils.Except([]uint64{9, 1, 2, 3, 7}, []uint64{1, 2, 3})
-	// 	_ = d
-
-	// 	fmt.Print("he")
-	// }
-
-	// 1) get the intersection set of dependent tasks
-	// 2) get the difference set of task and dependent tasks
-	// missingHeight := utils.SliceDifferenceInt(utils.FindIntersections(dependentTasksHeightSets), taskHeightSet)
 	missingHeight := utils.Except(utils.Intersect(dependentTasksHeightSets...), taskHeightSet)
 
 	return missingHeight, nil
@@ -116,8 +83,8 @@ func SyncIncrementalEpoch(ctx context.Context, finalityEpoch uint64, task string
 		syncHeight := utils.Intersect(dependentTasksHeightSets...)
 
 		for _, height := range syncHeight {
-			log.Infof("Sync: replay height: %v", height)
-			RunTask(ctx, task, height)
+			log.Infof("Sync: replay height: %v", int64(height))
+			RunTask(ctx, task, int64(height))
 		}
 	}
 }

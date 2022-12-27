@@ -18,7 +18,7 @@ type GasOutputs struct {
 	Nonce         uint64 `xorm:"notnull default 0"`
 	// Method             uint64 `xorm:"notnull default 0"`
 	// SizeBytes          int    `xorm:"notnull default 0"`
-	Status             int32  `xorm:"notnull default 0"`
+	Status             int64  `xorm:"notnull default 0"`
 	GasUsed            int64  `xorm:"integer notnull default 0"`
 	BaseFeeBurn        string `xorm:"numeric notnull"`
 	OverEstimationBurn string `xorm:"numeric notnull"`

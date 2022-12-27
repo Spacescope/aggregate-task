@@ -11,7 +11,7 @@ var taskMap = make(map[string]Task)
 type Task interface {
 	Name() string
 	Model() interface{}
-	Run(ctx context.Context, height uint64 /*, version int*/) error
+	Run(ctx context.Context, height int64 /*, version int*/) error
 }
 
 func Register(tasks ...Task) {
