@@ -22,6 +22,10 @@ func (s *Server) initconfig() {
 		logrus.Fatalf("Load configuration file err: %v", err)
 	}
 
+	if s.Cf.AggregateTask.FinalityEpoch > 900 {
+		logrus.Fatal("the finality should be less than or equal to 900, https://docs.filecoin.io/reference/reference/glossary/#finality")
+	}
+
 	utils.EngineGroup = utils.NewEngineGroup(s.Ctx, &[]utils.EngineInfo{{utils.DBExtract, s.Cf.AggregateTask.NotifyDB, nil}, {utils.DBOBTask, s.Cf.AggregateTask.ObservatoryDB, evmmodel.Tables}})
 }
 
@@ -37,5 +41,5 @@ func (s *Server) Start() {
 
 	go HttpServerStart(s.Cf.AggregateTask.Addr)
 
-	AggregateTaskStart(s.Ctx, s.Cf.Task.Name, s.Cf.Task.Depend)
+	AggregateTaskStart(s.Ctx, s.Cf.AggregateTask.FinalityEpoch, s.Cf.Task.Name, s.Cf.Task.Depend)
 }

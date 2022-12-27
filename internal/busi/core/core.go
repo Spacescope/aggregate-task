@@ -82,7 +82,7 @@ func SelfInspection(ctx context.Context, task string, dependTasks []string) ([]u
 	return missingHeight, nil
 }
 
-func SyncIncrementalEpoch(ctx context.Context, task string, dependTasks []string) {
+func SyncIncrementalEpoch(ctx context.Context, finalityEpoch uint64, task string, dependTasks []string) {
 	exdb := utils.EngineGroup[utils.DBExtract]
 	taskdb := utils.EngineGroup[utils.DBOBTask]
 
@@ -95,6 +95,9 @@ func SyncIncrementalEpoch(ctx context.Context, task string, dependTasks []string
 
 	if len(result) > 0 {
 		height, _ := strconv.ParseUint(result[0]["height"], 10, 64)
+		if height >= finalityEpoch {
+			height -= finalityEpoch
+		}
 
 		dependentTasksHeightSets := make([][]uint64, len(dependTasks))
 		for idx, dt := range dependTasks {

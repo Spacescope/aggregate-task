@@ -18,6 +18,7 @@ type AggregateTask struct {
 	Addr          string `toml:"listen"`
 	ObservatoryDB string `toml:"observatorydb"`
 	NotifyDB      string `toml:"notifydb"`
+	FinalityEpoch uint64 `toml:"finality"`
 }
 
 type Task struct {

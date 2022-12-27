@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func AggregateTaskStart(ctx context.Context, task string, dependTasks []string) {
+func AggregateTaskStart(ctx context.Context, finalityEpoch uint64, task string, dependTasks []string) {
 	// self-inspection, find the missing epochs
 	log.Infof("Self-Inspection: finding the missing epochs.")
 	missingHeight, err := core.SelfInspection(ctx, task, dependTasks)
@@ -34,7 +34,7 @@ func AggregateTaskStart(ctx context.Context, task string, dependTasks []string) 
 			return
 		case <-time.After(time.Second * 30): // heartbeat
 			log.Info("Ticktack: call syncIncrementalEpoch function.")
-			core.SyncIncrementalEpoch(ctx, task, dependTasks)
+			core.SyncIncrementalEpoch(ctx, finalityEpoch, task, dependTasks)
 		}
 	}
 }
