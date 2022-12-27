@@ -3,6 +3,7 @@ package busi
 import (
 	"aggregate-task/internal/busi/core"
 	"context"
+	"sort"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -15,14 +16,13 @@ func AggregateTaskStart(ctx context.Context, finalityEpoch uint64, task string, 
 	if err != nil {
 		return
 	}
+	sort.Slice(missingHeight, func(i, j int) bool { return missingHeight[i] < missingHeight[j] })
 
 	// replay the missing epochs
 	for idx, height := range missingHeight {
 		// runtask
 		log.Infof("Self-Inspection: replay[%v] height: %v", idx, int64(height))
-		if err := core.RunTask(ctx, task, int64(height)); err != nil {
-			return
-		}
+		core.RunTask(ctx, task, int64(height))
 	}
 	log.Infof("Self-Inspection: completed successfully.")
 

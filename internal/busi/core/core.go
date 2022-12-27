@@ -6,6 +6,7 @@ import (
 	"aggregate-task/pkg/utils"
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
@@ -53,6 +54,8 @@ func SyncIncrementalEpoch(ctx context.Context, finalityEpoch uint64, task string
 	exdb := utils.EngineGroup[utils.DBExtract]
 	taskdb := utils.EngineGroup[utils.DBOBTask]
 
+	log.Infof("Finality epoch is %v", finalityEpoch)
+
 	sql := fmt.Sprintf("select max(height) as height from %v", task)
 	result, err := taskdb.QueryString(sql)
 	if err != nil {
@@ -79,8 +82,8 @@ func SyncIncrementalEpoch(ctx context.Context, finalityEpoch uint64, task string
 			}
 		}
 
-		// syncHeight := utils.FindIntersections(dependentTasksHeightSets)
 		syncHeight := utils.Intersect(dependentTasksHeightSets...)
+		sort.Slice(syncHeight, func(i, j int) bool { return syncHeight[i] < syncHeight[j] })
 
 		for _, height := range syncHeight {
 			log.Infof("Sync: replay height: %v", int64(height))

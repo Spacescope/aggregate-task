@@ -4,7 +4,7 @@ import (
 	"aggregate-task/pkg/models/dependentmodel"
 	"context"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"aggregate-task/pkg/utils"
 )
@@ -16,32 +16,35 @@ type BlockTransactionReceipt struct {
 	idx         int
 }
 
-func (btr *BlockTransactionReceipt) getEVMBlockHeader(ctx context.Context, height int64) (*dependentmodel.BlockHeader, bool) {
+func (btr *BlockTransactionReceipt) getEVMBlockHeader(ctx context.Context, height int64) (*dependentmodel.BlockHeader, bool, error) {
 	evmBlockHeader := new(dependentmodel.BlockHeader)
 	b, err := utils.EngineGroup[utils.DBOBTask].Where("height = ?", height).Get(evmBlockHeader)
 	if err != nil {
-		logrus.Infof("[%v] Executed sql error: %v", height, err)
-		return nil, false
+		log.Infof("[%v] Executed sql error: %v", height, err)
+		return nil, false, err
 	}
 
 	if b {
-		return evmBlockHeader, true
+		return evmBlockHeader, true, nil
 	} else {
-		return nil, false
+		return nil, false, nil
 	}
 }
 
 func (btr *BlockTransactionReceipt) getEVMTransaction(ctx context.Context, height int64) ([]*dependentmodel.Transaction, error) {
 	evmTransactions := make([]*dependentmodel.Transaction, 0)
-	err := utils.EngineGroup[utils.DBOBTask].Where("height = ?", height).Find(&evmTransactions)
-	return evmTransactions, err
+	if err := utils.EngineGroup[utils.DBOBTask].Where("height = ?", height).Find(&evmTransactions); err != nil {
+		log.Infof("[%v] Executed sql error: %v", height, err)
+		return nil, err
+	}
+	return evmTransactions, nil
 }
 
 func (btr *BlockTransactionReceipt) getEVMReceipt(ctx context.Context, height int64, txnHash string) (*dependentmodel.Receipt, bool) {
 	evmReceipt := new(dependentmodel.Receipt)
 	b, err := utils.EngineGroup[utils.DBOBTask].Where("height = ? and transaction_hash = ?", height, txnHash).Get(evmReceipt)
 	if err != nil {
-		logrus.Infof("[%v] Executed sql error: %v", height, err)
+		log.Infof("[%v] Executed sql error: %v", height, err)
 		return nil, false
 	}
 
@@ -53,7 +56,10 @@ func (btr *BlockTransactionReceipt) getEVMReceipt(ctx context.Context, height in
 }
 
 func (btr *BlockTransactionReceipt) GetBlockTransactionReceipt(ctx context.Context, height int64) error {
-	bh, b := btr.getEVMBlockHeader(ctx, height)
+	bh, b, err := btr.getEVMBlockHeader(ctx, height)
+	if err != nil {
+		return err
+	}
 	if !b {
 		return nil
 	}

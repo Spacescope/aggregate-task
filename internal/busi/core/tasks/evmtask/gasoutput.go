@@ -5,6 +5,7 @@ import (
 
 	"aggregate-task/internal/busi/core/tasks/evmtask/gasoutput"
 	"aggregate-task/pkg/models/evmmodel"
+	"aggregate-task/pkg/utils"
 
 	"github.com/filecoin-project/go-state-types/big"
 
@@ -23,10 +24,9 @@ func (g *GasOutput) Model() interface{} {
 }
 
 func (g *GasOutput) Run(ctx context.Context, height int64) error {
-
 	btr := new(gasoutput.BlockTransactionReceipt)
 	if err := btr.GetBlockTransactionReceipt(ctx, height); err != nil {
-		log.Error("GetBlockTransactionReceipt error: %v", err)
+		log.Error("GetBlockTransactionReceipt[%v] error: %v", height, err)
 		return err
 	}
 
@@ -57,7 +57,7 @@ func (g *GasOutput) Run(ctx context.Context, height int64) error {
 			GasPremium: t.MaxPriorityFeePerGas,
 			GasLimit:   int64(t.GasLimit),
 			Nonce:      t.Nonce,
-			// Method:             r.Method,
+			Method:     t.Type,
 
 			Status:             r.Status,
 			GasUsed:            r.GasUsed,
@@ -74,12 +74,10 @@ func (g *GasOutput) Run(ctx context.Context, height int64) error {
 	}
 
 	if len(gasOutputSlice) > 0 {
-		// if err := storage.DelOldVersionAndWriteMany(ctx, new(evmmodel.GasOutputs), height, version, &gasOutputSlice); err != nil {
-		// 	return errors.Wrap(err, "storage.WriteMany failed")
-		// }
-
-		// utils.EngineGroup[utils.DBOBTask]
-
+		if err := utils.BatchWrite(ctx, new(evmmodel.GasOutputs), height, &gasOutputSlice); err != nil {
+			log.Errorf("BatchWrite[%v] error: %v", height, err)
+			return err
+		}
 	}
 
 	return nil
