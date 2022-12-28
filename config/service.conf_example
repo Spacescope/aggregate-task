@@ -1,0 +1,11 @@
+title = "spacescope-aggregate-task"
+
+[aggregate-task]
+    listen = ":7007"
+    observatorydb = "postgresql://user:passowrd@ip:port/dbname?sslmode=disable"
+    notifydb = "postgresql://user:passowrd@ip:port/dbname?sslmode=disable"
+    finality = 900
+
+[task]
+    name = "evm_derived_gas_outputs" #talbename, make sure your table name takes the word: "derived"
+    depend = ["evm_block_header", "evm_transaction", "evm_receipt"] #talbename
