@@ -76,3 +76,8 @@ func (g *Gin) HTTPResponseOK(data interface{}) {
 	requestId := g.C.Request.Header.Get("Kong-Request-ID")
 	g.C.JSON(http.StatusOK, NewResponseWithRequestId(requestId, NewResponse(OK.Code, OK.Message, data)))
 }
+
+func (g *Gin) HTTPResponse(httpCode int, r *Response) {
+	requestId := g.C.Request.Header.Get("Kong-Request-ID")
+	g.C.JSON(httpCode, NewResponseWithRequestId(requestId, r))
+}

@@ -39,7 +39,7 @@ func (s *Server) Start() {
 	s.initconfig()
 	s.setLogTimeformat()
 
-	go HttpServerStart(s.Cf.AggregateTask.Addr)
+	go HttpServerStart(s.Cf.AggregateTask.Addr, s.Cf.Task.Name, s.Cf.Task.Depend)
 
 	AggregateTaskStart(s.Ctx, s.Cf.AggregateTask.FinalityEpoch, s.Cf.Task.Name, s.Cf.Task.Depend)
 }

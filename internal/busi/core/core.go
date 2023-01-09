@@ -9,6 +9,10 @@ import (
 	"sort"
 	"strconv"
 
+	"net/http"
+
+	"aggregate-task/internal/busi/core/walk"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -90,4 +94,12 @@ func SyncIncrementalEpoch(ctx context.Context, finalityEpoch uint64, task string
 			RunTask(ctx, task, int64(height))
 		}
 	}
+}
+
+func WalkTipsetsRun(ctx context.Context, r *Walk) *utils.BuErrorResponse {
+	if err := walk.NewWalker(r.MinHeight, r.MaxHeight, r.Task, r.DependentTasks).WalkChain(ctx, true); err != nil {
+		return &utils.BuErrorResponse{HttpCode: http.StatusOK, Response: &utils.Response{Code: utils.CodeInternalServer, Message: err.Error()}}
+	}
+
+	return nil
 }

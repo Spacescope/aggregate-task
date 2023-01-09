@@ -9,10 +9,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func setWalkerConfig(task string, dependTasks []string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set(v1.TASK, task)
+		c.Set(v1.DEPENDENTTASKS, dependTasks)
+
+		c.Next()
+	}
+}
+
 func (s *HttpServer) registerV1(r *gin.Engine) {
 	apiv1 := r.Group("/api/v1")
 	{
 		apiv1.GET("/ping", v1.Ping)
+
+		apiv1.POST("/walk", setWalkerConfig(s.task, s.dependTasks), v1.WalkTipsets)
 	}
 }
 
@@ -25,9 +36,9 @@ func (s *HttpServer) RegisterRoutes(r *gin.Engine) {
 }
 
 func (s *HttpServer) Start() {
-	// // if Flags.Mode == "prod" {
+	// if Flags.Mode == "prod" {
 	gin.SetMode(gin.ReleaseMode)
-	// // }
+	// }
 
 	// r := gin.Default()
 	r := gin.New()
@@ -54,13 +65,15 @@ func (s *HttpServer) Start() {
 }
 
 type HttpServer struct {
-	addr string
+	addr        string
+	task        string
+	dependTasks []string
 }
 
-func NewHttpServer(addr string) *HttpServer {
-	return &HttpServer{addr}
+func NewHttpServer(addr string, task string, dependTasks []string) *HttpServer {
+	return &HttpServer{addr, task, dependTasks}
 }
 
-func HttpServerStart(addr string) {
-	NewHttpServer(addr).Start()
+func HttpServerStart(addr string, task string, dependTasks []string) {
+	NewHttpServer(addr, task, dependTasks).Start()
 }
